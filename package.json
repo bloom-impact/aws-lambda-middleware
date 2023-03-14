@@ -1,13 +1,13 @@
 {
-    "name": "aws-lambda-middleware",
-    "version": "1.0.0",
+    "name": "@bloom-impact/aws-lambda-middleware",
+    "version": "1.0.0-rc.1",
     "description": "Node.js (TypeScript) middleware for use with AWS Lambda.",
     "scripts": {
         "build": "tsc --noEmit",
         "fix": "npx prettier --write .; eslint . --ext .ts,.tsx --fix",
         "test": "jest --detectOpenHandles",
         "prerelease": "tsc --project tsconfig.build.json && cp package.json lib/",
-        "release": "cd lib/ && yarn publish --non-interactive"
+        "release": "cd lib/ && yarn publish --non-interactive --verbose"
     },
     "publishConfig": {
         "registry": "https://npm.pkg.github.com"

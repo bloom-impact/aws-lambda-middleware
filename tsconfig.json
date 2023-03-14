@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "lib": ["es2019", "dom"],
+        "target": "ES2017",
+        "module": "commonjs",
+        "declaration": false,
+        "typeRoots": ["./types", "./node_modules/@types"] /* List of folders to include type definitions from. */
+    }
+}

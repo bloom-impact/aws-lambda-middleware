@@ -5,7 +5,12 @@
     "scripts": {
         "build": "tsc --noEmit",
         "fix": "npx prettier --write .; eslint . --ext .ts,.tsx --fix",
-        "test": "jest --detectOpenHandles"
+        "test": "jest --detectOpenHandles",
+        "prerelease": "tsc --project tsconfig.build.json && cp package.json lib/",
+        "release": "cd lib/ && yarn publish --non-interactive"
+    },
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com"
     },
     "repository": "git@github.com:bloom-impact/aws-lambda-middleware.git",
     "author": "Bertrand Caron <bertrand.fx.caron@gmail.com>",

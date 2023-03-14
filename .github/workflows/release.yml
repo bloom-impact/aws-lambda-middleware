@@ -1,0 +1,26 @@
+name: Build and publish GitHub package
+
+on:
+  push:
+    branches:
+      - 'release'
+    tags:
+      - v*
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Login to GitHub NPM registry
+        run: |
+          echo "@bloom-impact:registry=https://npm.pkg.github.com" > .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.WRITE_GITHUB_PACKAGES_TOKEN }}" >> .npmrc
+
+      - run: yarn install
+
+      - run: yarn test
+
+      - run: |
+          yarn release

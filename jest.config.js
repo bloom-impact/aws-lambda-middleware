@@ -15,4 +15,5 @@ module.exports = {
         },
     },
     collectCoverageFrom: ['src/**/*.ts', '!src/__tests__/**/*.ts', '!src/scripts/**/*.ts'],
+    testPathIgnorePatterns: ['/__utils__.'],
 }

@@ -4,6 +4,7 @@ import {DEFAULT_HEADERS, successResponse} from '../../../Helpers/ApiGateway'
 import {sleep} from '../../../Helpers/Promise'
 import {withErrorHandling} from '../../../Middlewares/Async/WithErrorHandling'
 import {ApiGatewayResponse} from '../../../Types/ApiGateway'
+import {DEFAULT_LAMBDA_CONTEXT, DEFAULT_LAMBDA_EVENT} from '../../_utils__/Lambda'
 
 describe('Middlewares/Async/WithErrorHandling', () => {
     // Save original console.log function.
@@ -19,11 +20,6 @@ describe('Middlewares/Async/WithErrorHandling', () => {
         console.log = log
     })
 
-    const lambdaContext = {
-        getRemainingTimeInMillis: () => 5000,
-        callbackWaitsForEmptyEventLoop: true,
-    }
-
     test('withErrorHandling() can return success response', async () => {
         const response = successResponse({success: true})
         const handler = () => Promise.resolve(response)
@@ -31,7 +27,12 @@ describe('Middlewares/Async/WithErrorHandling', () => {
         const onTimeout = jest.fn()
         const onInvalidResponse = jest.fn()
         await expect(
-            withErrorHandling(handler, onError, onTimeout, onInvalidResponse)({}, lambdaContext),
+            withErrorHandling(
+                handler,
+                onError,
+                onTimeout,
+                onInvalidResponse,
+            )(DEFAULT_LAMBDA_EVENT, DEFAULT_LAMBDA_CONTEXT),
         ).resolves.toEqual(response)
         expect(onError).not.toHaveBeenCalled()
         expect(onTimeout).not.toHaveBeenCalled()
@@ -43,8 +44,8 @@ describe('Middlewares/Async/WithErrorHandling', () => {
         const handler = () => Promise.resolve(response)
         await expect(
             withErrorHandling(handler, jest.fn(), jest.fn(), jest.fn(), {logEvent: false, timeoutGraceMs: 200})(
-                {},
-                lambdaContext,
+                DEFAULT_LAMBDA_EVENT,
+                DEFAULT_LAMBDA_CONTEXT,
             ),
         ).resolves.toEqual(response)
         expect(console.log).toHaveBeenCalledWith(
@@ -57,8 +58,8 @@ describe('Middlewares/Async/WithErrorHandling', () => {
         const handler = () => Promise.resolve(response)
         await expect(
             withErrorHandling(handler, jest.fn(), jest.fn(), jest.fn(), {logResult: false, timeoutGraceMs: 200})(
-                {},
-                lambdaContext,
+                DEFAULT_LAMBDA_EVENT,
+                DEFAULT_LAMBDA_CONTEXT,
             ),
         ).resolves.toEqual(response)
         expect(console.log).toHaveBeenCalledWith(
@@ -74,7 +75,9 @@ describe('Middlewares/Async/WithErrorHandling', () => {
         const onError = jest.fn(async () => {
             return {statusCode: 400, body: 'ERROR', headers: DEFAULT_HEADERS} satisfies ApiGatewayResponse
         })
-        await expect(withErrorHandling(handler, onError, jest.fn(), jest.fn())({}, lambdaContext)).resolves.toEqual({
+        await expect(
+            withErrorHandling(handler, onError, jest.fn(), jest.fn())(DEFAULT_LAMBDA_EVENT, DEFAULT_LAMBDA_CONTEXT),
+        ).resolves.toEqual({
             statusCode: 400,
             headers: DEFAULT_HEADERS,
             body: 'ERROR',
@@ -97,7 +100,7 @@ describe('Middlewares/Async/WithErrorHandling', () => {
         })
         await expect(
             withErrorHandling(handler, jest.fn(), onTimeout, jest.fn(), {timeoutGraceMs: 0})(
-                {},
+                DEFAULT_LAMBDA_EVENT,
                 lambdaContextShortTimeout,
             ),
         ).resolves.toEqual({
@@ -116,13 +119,16 @@ describe('Middlewares/Async/WithErrorHandling', () => {
         const validator = ajv.compile({type: 'object'})
         const onInvalidResponse = jest.fn()
         await expect(
-            withErrorHandling(handler, jest.fn(), jest.fn(), onInvalidResponse, {validator})({}, lambdaContext),
+            withErrorHandling(handler, jest.fn(), jest.fn(), onInvalidResponse, {validator})(
+                DEFAULT_LAMBDA_EVENT,
+                DEFAULT_LAMBDA_CONTEXT,
+            ),
         ).resolves.toEqual({
             statusCode: 200,
             headers: DEFAULT_HEADERS,
             body: '{"data":null}',
         })
-        expect(onInvalidResponse).toHaveBeenCalledWith({}, '{"data":null}', [
+        expect(onInvalidResponse).toHaveBeenCalledWith(DEFAULT_LAMBDA_EVENT, '{"data":null}', [
             {
                 instancePath: '',
                 keyword: 'type',

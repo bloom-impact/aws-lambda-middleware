@@ -15,8 +15,6 @@ export const DEFAULT_HEADERS: ApiGatewayHeaders = {
 
 /**
  * Return an API Gateway success response (based on the JSON API specification).
- * If provided, a `validator` function is run on the JSON API response, and throws an `HttpError`.
- * Note that the error can be caught, and the response (which is present in the error context) still returned.
  */
 export const successResponse = <T, U extends object = JsonApiMeta>(data: T, meta?: U): ApiGatewayResponse => {
     const response: JsonApiResponse<T, U> = {data, meta}

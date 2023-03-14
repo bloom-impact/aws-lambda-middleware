@@ -1,17 +1,15 @@
 import {successResponse} from '../../../Helpers/ApiGateway'
 import {silenceErrors} from '../../../Middlewares/Async/SilenceErrors'
+import {DEFAULT_LAMBDA_CONTEXT, DEFAULT_LAMBDA_EVENT} from '../../_utils__/Lambda'
 
 describe('Middlewares/Async/SilenceErrors', () => {
-    const lambdaContext = {
-        getRemainingTimeInMillis: () => 10000,
-        callbackWaitsForEmptyEventLoop: true,
-    }
-
     test('silenceErrors() returns normally', async () => {
         const response = successResponse({success: true})
         const handler = () => Promise.resolve(response)
         const onError = jest.fn()
-        await expect(silenceErrors(handler, onError)({}, lambdaContext)).resolves.toEqual(response)
+        await expect(silenceErrors(handler, onError)(DEFAULT_LAMBDA_EVENT, DEFAULT_LAMBDA_CONTEXT)).resolves.toEqual(
+            response,
+        )
         expect(onError).not.toHaveBeenCalled()
     })
 
@@ -22,7 +20,9 @@ describe('Middlewares/Async/SilenceErrors', () => {
             throw error
         }
         const onError = jest.fn()
-        await expect(silenceErrors(handler, onError)({}, lambdaContext)).resolves.toEqual(response)
+        await expect(silenceErrors(handler, onError)(DEFAULT_LAMBDA_EVENT, DEFAULT_LAMBDA_CONTEXT)).resolves.toEqual(
+            response,
+        )
         expect(onError).toHaveBeenCalledWith(error)
     })
 
@@ -38,7 +38,9 @@ describe('Middlewares/Async/SilenceErrors', () => {
         const onError = async () => {
             throw new Error('Something went wrong again!')
         }
-        await expect(silenceErrors(handler, onError)({}, lambdaContext)).resolves.toEqual(response)
+        await expect(silenceErrors(handler, onError)(DEFAULT_LAMBDA_EVENT, DEFAULT_LAMBDA_CONTEXT)).resolves.toEqual(
+            response,
+        )
         expect(console.log).toHaveBeenCalledWith(expect.stringContaining('[ERROR]'))
         expect(console.log).toHaveBeenCalledWith(
             expect.stringContaining(

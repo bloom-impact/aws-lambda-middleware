@@ -29,7 +29,7 @@ export const withErrorHandling =
         handler: AsyncHandler<T>,
         onError: (error: unknown, durationMs: number) => Promise<ApiGatewayResponse>,
         onTimeOut: (durationMs: number) => Promise<ApiGatewayResponse>,
-        onInvalidResponse: () => Promise<void>,
+        onInvalidResponse: (event: T, response: unknown, errors: unknown[] | null | undefined) => Promise<void>,
         options?: WithErrorHandlingOptions<R>,
     ): AsyncHandler<T> =>
     async (event: T, context: LambdaContext): Promise<ApiGatewayResponse> => {
@@ -65,7 +65,7 @@ export const withErrorHandling =
                 // Try validating the response body
                 const valid = validator(response.body)
                 if (!valid) {
-                    await onInvalidResponse()
+                    await onInvalidResponse(event, response.body, validator.errors)
                 }
             }
 

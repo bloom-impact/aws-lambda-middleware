@@ -1,3 +1,5 @@
+import {unzip} from 'zlib'
+
 import type {CloudWatchScheduledEvent, CloudWatchTriggeredEvent} from '../Types/CloudWatch'
 
 /**
@@ -11,3 +13,15 @@ export const isCloudWatchTriggeredEvent = (event: object): event is CloudWatchTr
     event.awslogs !== null &&
     'data' in event.awslogs &&
     typeof event.awslogs.data === 'string'
+
+export const unzipPromise = (buffer: Buffer): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        unzip(buffer, (error, result) => {
+            if (error !== null) {
+                reject(error)
+            } else {
+                resolve(result.toString('ascii'))
+            }
+        })
+    })
+}

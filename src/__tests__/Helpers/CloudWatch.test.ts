@@ -1,4 +1,18 @@
-import {isCloudWatchScheduledEvent, isCloudWatchTriggeredEvent} from '../../Helpers/CloudWatch'
+import {gzip} from 'zlib'
+
+import {isCloudWatchScheduledEvent, isCloudWatchTriggeredEvent, unzipPromise} from '../../Helpers/CloudWatch'
+
+export const gzipPromise = (buffer: Buffer): Promise<Buffer> => {
+    return new Promise((resolve, reject) => {
+        gzip(buffer, (error, result) => {
+            if (error !== null) {
+                reject(error)
+            } else {
+                resolve(result)
+            }
+        })
+    })
+}
 
 describe('Helpers/CloudWatch', () => {
     test('isCloudWatchScheduledEvent()', () => {
@@ -14,5 +28,16 @@ describe('Helpers/CloudWatch', () => {
         expect(
             isCloudWatchTriggeredEvent({awslogs: {data: 'H4sIAAAAAAAAE6tWSkksSVSyUog21DHSMY6tBQAuoQv7EQAAAA=='}}),
         ).toEqual(true)
+    })
+
+    test('gzipPromise() and unzipPromise()', async () => {
+        const input = {data: [1, 2, 3]}
+        const base64data = (await gzipPromise(Buffer.from(JSON.stringify(input), 'ascii'))).toString('base64')
+        expect(base64data).toEqual('H4sIAAAAAAAAE6tWSkksSVSyijbUMdIxjq0FAM8/TwkQAAAA')
+        expect(JSON.parse(await unzipPromise(Buffer.from(base64data, 'base64')))).toEqual(input)
+    })
+
+    test('unzipPromise() erroring', async () => {
+        await expect(unzipPromise(Buffer.from('', 'base64'))).rejects.toEqual(expect.anything())
     })
 })

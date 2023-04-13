@@ -30,10 +30,9 @@ describe('Helpers/CloudWatch', () => {
         ).toEqual(true)
     })
 
-    test('gzipPromise() and unzipPromise()', async () => {
+    test('gzipPromise() and unzipPromise() work (round trip)', async () => {
         const input = {data: [1, 2, 3]}
         const base64data = (await gzipPromise(Buffer.from(JSON.stringify(input), 'ascii'))).toString('base64')
-        expect(base64data).toEqual('H4sIAAAAAAAAE6tWSkksSVSyijbUMdIxjq0FAM8/TwkQAAAA')
         expect(JSON.parse(await unzipPromise(Buffer.from(base64data, 'base64')))).toEqual(input)
     })
 

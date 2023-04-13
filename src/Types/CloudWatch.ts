@@ -18,3 +18,12 @@ export type CloudWatchScheduledEvent = {
     readonly ressources: string[]
     readonly details: object
 }
+
+export type CloudWatchTriggeredEvent = {
+    readonly awslogs: {
+        /**
+         * Base-64 encoded, gzipped log data.
+         */
+        readonly data: string
+    }
+}
